@@ -23,16 +23,48 @@ var qKey;
 var players = [];
 var gameTime = 0;
 
+//Sound map entries [sLabel, sFileName]
+const mSoundAssets = new Map([
+    ["mainLoop", "Angela ggj18 SV1 music loop.wav"],
+    ["shipDematerialize", "Dematerializing Spaceship (Angela).wav"],
+    ["laserBounce1", "LaserBounce01.wav"],
+    ["laserBounce2", "LaserBounce02.wav"],
+    ["laserBounce3", "LaserBounce03.wav"],
+    ["laserBounce4", "LaserBounce04.wav"],
+    ["laserBounce5", "LaserBounce05.wav"],
+    ["laserFire", "LaserFire.wav"],
+    ["laserLoop", "LaserLoop.wav"],
+    ["loseJingle", "Losing.. (Angela).wav"],
+    ["shipMaterialize", "Materializing Spaceship (Angela).wav"],
+    ["shipSpin", "Spinning Spaceship (Angela).wav"],
+    ["winJingle", "Winning! (Angela).wav"]
+]);
+let mSounds = new Map();
+
+function audioLoadHelper(mLabelsToFileNames) {
+    mLabelsToFileNames.forEach((val, key) => {
+        game.load.audio(key, `/assets/audio/${val}`);
+    });
+}
+
 function preload() {
-    game.load.image("star", "assets/star.png");
-    game.load.image("pizza", "assets/pizza.png")
+    // Sprites
+    game.load.image("star", "assets/images/star.png");
+    game.load.image("pizza", "assets/images/pizza.png");
+
+    // Audio
+    audioLoadHelper(mSoundAssets);
 }
 
 function create() {
     game.physics.startSystem(Phaser.Physics.P2JS);
     players.push(new Player('A', 'pizza', game, 500, 500));
     players.push(new Player('B', 'star', game, 100, 100));
-    game.add.sprite(0, 0, "star");
+
+    // Load in all the sounds
+    mSoundAssets.forEach((_, key) => {
+        mSounds.set(key, game.add.audio(key));
+    });
 }
 
 function update() {
@@ -85,7 +117,6 @@ class Player {
         } else {
             this._idle();
         }
-        // console.log(`${this._keyName} is processing.`);
     }
 
     _idle() {
@@ -94,7 +125,8 @@ class Player {
 
     _onDown () {
         this._state = PLAYER_STATES.spinning;
-        console.log(`${this._keyName} is charging!`)
+        console.log(`${this._keyName} is charging!`);
+        mSounds.get("shipSpin").play();
     }
 
     _isDown() {
@@ -104,6 +136,7 @@ class Player {
     }
 
     _onUp () {
+        mSounds.get("shipSpin").stop();
         this._state = PLAYER_STATES.firing;
         this._angularVelocity = DEFAULT_ANGULAR_VELOCITY;
         this.fireBeam();
@@ -115,13 +148,6 @@ class Player {
         // TODO: implement
         let fireAngle = this._sprite.body.angle;
         console.log(`${this._keyName} is firing at ${fireAngle} degrees for ${this._power} distance!`);
-    }
-
-    charge() {
-        // As long as our key is down:
-        // - increment power over time
-        // - increase spin rate over time
-
     }
 
     move(angle, power) {
