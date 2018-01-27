@@ -2,7 +2,7 @@
 <html lang="en"> 
 <head> 
     <meta charset="UTF-8" />
-    <title>Phaser - Making your first game, part 1</title>
+    <title>Space Golf</title>
     <script src="phaser.min.js"></script>
     <style type="text/css">
         body {
@@ -14,26 +14,102 @@
 
 <script type="text/javascript">
 
-var game = new Phaser.Game(800, 600, Phaser.AUTO, '', { preload: preload, create: create, update: update });
+var game = new Phaser.Game(1280, 720, Phaser.AUTO, '', { preload: preload, create: create, update: update, render: render });
 
-var platforms;
+var player;
+var spark;
+var bounceSpark;
+var outSpark;
+var speed = 300;
+var maxCharge = 400;
+var charge = maxCharge;
+var inBeam;
+
+var topbound;
+var outBeam;
+var isReflectedTop;
+var bouncePoint;
 
 function preload() {
 
-    game.load.image("star", "assets/star.png");
+    game.load.image("star", "assets/pizza.png");
+    game.load.image("spark", "assets/spark.png");
 }
 
 function create() {
 
-    game.physics.startSystem(Phaser.Physics.ARCADE);
+    game.physics.startSystem(Phaser.Physics.P2JS);
 
 
-    game.add.sprite(0, 0, "star");
+    player = game.add.sprite(game.world.width/2, game.world.height-100, "star");
+    player.anchor.set(0.5);
+    spark = game.add.sprite(game.world.width/2, game.world.height-100, "spark").alignTo(player, Phaser.TOP_CENTER);
+    spark.anchor.set(0.5);
+    
 
+    game.physics.p2.enable(spark);
+    spark.fixedRotation = true;
+    player.scale.x = 2;
+    player.scale.y = 2;
+
+    
+    inBeam = new Phaser.Line(player.x, player.y, spark.x, spark.y);
+    topbound = new Phaser.Line(0, 5, game.world.width, 5);
     
 }
 
 function update() {
+
+    if (charge > 0) {
+        spark.body.moveForward(speed);
+        
+        if (bouncePoint) {
+            debugger;
+            outBeam.fromSprite(bounceSpark, spark, true);
+        } else {
+            inBeam.fromSprite(player, spark, true);         
+        }
+        charge--;
+    } else {
+        spark.body.setZeroVelocity();
+        if (outSpark) outSpark.body.setZeroVelocity();
+    }
+
+    if (isReflectedTop) {return;}
+
+    bouncePoint = inBeam.intersects(topbound);
+    if (bouncePoint) {
+
+        bounceSpark = game.add.sprite(bouncePoint.x, bouncePoint.y, "spark");
+        bounceSpark.anchor.set(.5);
+
+        var angleOfReflection = inBeam.reflect(topbound);
+
+        outBeam = new Phaser.Line().fromAngle(bouncePoint.x, bouncePoint.y, angleOfReflection, 10);
+
+        
+        spark.body.x = outBeam.end.x;
+        spark.body.y = outBeam.end.y;
+        console.log("out beam angle: ", outBeam.angle);
+        console.log("spark angle: ", spark.body.angle);
+        spark.body.rotation = outBeam.angle;
+        console.log("spark angle: ", spark.body.angle);
+
+        isReflectedTop = true;
+    }
+
+}
+
+function render() {
+
+    game.debug.geom(inBeam, '#ff0000');
+    game.debug.geom(topbound, '#00ff00');
+    game.debug.lineInfo(inBeam, 32, 32);
+    if (outBeam) {
+        game.debug.lineInfo(outBeam, 32, 100);
+    }
+    game.debug.bodyInfo(spark, 32, 150);
+    game.debug.geom(outBeam, '#0000ff');
 }
 
 </script>
