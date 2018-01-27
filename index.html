@@ -3,7 +3,8 @@
 <head> 
     <meta charset="UTF-8" />
     <title>Phaser - Making your first game, part 1</title>
-    <script src="phaser.min.js"></script>
+    <!-- <script src="phaser.min.js"></script> -->
+    <script src="phaser-ce-2.10.0/build/phaser.js"></script>
     <style type="text/css">
         body {
             margin: 0;
@@ -19,21 +20,63 @@ var game = new Phaser.Game(800, 600, Phaser.AUTO, '', { preload: preload, create
 var platforms;
 
 function preload() {
-
     game.load.image("star", "assets/star.png");
+    game.load.image("pizza", "assets/pizza.png")
 }
 
+var qKey;
+var players = [];
 function create() {
-
-    game.physics.startSystem(Phaser.Physics.ARCADE);
-
-
+    game.physics.startSystem(Phaser.Physics.P2JS);
+    players.push(new Player(key, image, game));
     game.add.sprite(0, 0, "star");
-
     
 }
 
 function update() {
+    // Check player input
+    if (qKey.isDown) {
+        player1.body.rotateLeft(50);
+    } else {
+        player1.body.setZeroRotation();
+    }
+}
+
+const PLAYER_STATES = Object.freeze({
+    default: 0,
+    spinning: 1,
+    firing: 2,
+    moving: 3
+});
+// TODO
+class Player {
+    /**
+     * key is control assigned to this player
+     * optional: x, y coords
+    **/
+    constructor (key, image, game) {
+        this._sprite = game.add.sprite(50, 50, "pizza");
+        game.physics.p2.enable(this._sprite);
+        this._key = game.input.keyboard.addKey(Phaser.Keyboard[key.toUpperCase()]);
+        this._state = PLAYER_STATES.default;
+
+        _addCallbacks(this);
+    }
+
+    _addCallbacks() {
+
+    }
+
+    charge() {
+        // As long as our key is down:
+        // - increment power over time
+        // - increase spin rate over time
+
+    }
+
+    move(angle, power) {
+        //TODO: implement movement
+    }
 }
 
 </script>
