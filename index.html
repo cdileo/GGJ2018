@@ -16,19 +16,17 @@
 
 var game = new Phaser.Game(1280, 720, Phaser.AUTO, '', { preload: preload, create: create, update: update, render: render });
 
-var player;
+var playerShoot;
 var spark;
-var bounceSpark;
-var outSpark;
-var speed = 300;
-var maxCharge = 400;
-var charge = maxCharge;
-var inBeam;
 
-var topbound;
-var outBeam;
-var isReflectedTop;
-var bouncePoint;
+var speed = 600;
+var maxCharge = 300;
+var charge = maxCharge;
+
+var bounds;
+var beams;
+var beamSprites;
+var lastIntersection;
 
 function preload() {
 
@@ -40,76 +38,98 @@ function create() {
 
     game.physics.startSystem(Phaser.Physics.P2JS);
 
-
-    player = game.add.sprite(game.world.width/2, game.world.height-100, "star");
-    player.anchor.set(0.5);
-    spark = game.add.sprite(game.world.width/2, game.world.height-100, "spark").alignTo(player, Phaser.TOP_CENTER);
+    playerShoot = game.add.sprite(game.world.width/2, game.world.height-100, "star");
+    playerShoot.anchor.set(0.5);
+    spark = game.add.sprite(game.world.width/2, game.world.height-100, "spark").alignTo(playerShoot, Phaser.TOP_CENTER);
     spark.anchor.set(0.5);
     
 
     game.physics.p2.enable(spark);
     spark.fixedRotation = true;
-    player.scale.x = 2;
-    player.scale.y = 2;
+    spark.body.fixedRotation = true;
+    playerShoot.scale.x = 2;
+    playerShoot.scale.y = 2;
 
-    
-    inBeam = new Phaser.Line(player.x, player.y, spark.x, spark.y);
-    topbound = new Phaser.Line(0, 5, game.world.width, 5);
+    spark.body.angle = 45;
+
+    bounds =[
+        new Phaser.Line(10, 10, game.world.width-10, 40),
+        new Phaser.Line(10, game.world.height-10, game.world.width, game.world.height-10),
+        new Phaser.Line(40, 10, 10, game.world.height-10),
+        new Phaser.Line(game.world.width-10, 40, game.world.width-10, game.world.height-10)
+    ];
+
+    beams = [new Phaser.Line(playerShoot.x, playerShoot.y, spark.x, spark.y)];
+    beamSprites = [];
+
+    lastIntersection = -1;
     
 }
 
 function update() {
+    laserUpdate();
+}
 
+function lastBeam() {
+    return beams[beams.length-1];
+}
+
+function lastBeamSprite() {
+    return beamSprites[beamSprites.length - 1];
+}
+
+function laserUpdate() {
     if (charge > 0) {
         spark.body.moveForward(speed);
-        
-        if (bouncePoint) {
-            debugger;
-            outBeam.fromSprite(bounceSpark, spark, true);
+        if (beamSprites.length > 0) {
+            lastBeam().fromSprite(lastBeamSprite(), spark, true);
         } else {
-            inBeam.fromSprite(player, spark, true);         
-        }
-        charge--;
+            lastBeam().fromSprite(playerShoot, spark, true);  
+        }       
+        // charge--;
+
     } else {
         spark.body.setZeroVelocity();
-        if (outSpark) outSpark.body.setZeroVelocity();
     }
 
-    if (isReflectedTop) {return;}
-
-    bouncePoint = inBeam.intersects(topbound);
-    if (bouncePoint) {
-
-        bounceSpark = game.add.sprite(bouncePoint.x, bouncePoint.y, "spark");
-        bounceSpark.anchor.set(.5);
-
-        var angleOfReflection = inBeam.reflect(topbound);
-
-        outBeam = new Phaser.Line().fromAngle(bouncePoint.x, bouncePoint.y, angleOfReflection, 10);
-
+    bounds.forEach(function(item, index, array) {
+        bouncePoint = lastBeam().intersects(item);
+        if (bouncePoint && lastIntersection != index) {
+            onIntersect(lastBeam(), item);
+            lastIntersection = index;
+        }
         
+    });
+    bouncePoint = null;
+}
+
+function onIntersect(beam, bound) {
+        
+        var bounceSpark = game.add.sprite(bouncePoint.x, bouncePoint.y, "spark");  
+        bounceSpark.anchor.set(.5);  
+        beamSprites.push(bounceSpark);
+        
+        var angleOfReflection = beam.reflect(bound);
+
+        var outBeam = new Phaser.Line().fromAngle(bouncePoint.x, bouncePoint.y, angleOfReflection, 20);
+
         spark.body.x = outBeam.end.x;
         spark.body.y = outBeam.end.y;
-        console.log("out beam angle: ", outBeam.angle);
-        console.log("spark angle: ", spark.body.angle);
-        spark.body.rotation = outBeam.angle;
-        console.log("spark angle: ", spark.body.angle);
+        spark.body.rotation = angleOfReflection+Math.PI/2;
 
-        isReflectedTop = true;
-    }
-
+        beams.push(outBeam);
 }
 
 function render() {
 
-    game.debug.geom(inBeam, '#ff0000');
-    game.debug.geom(topbound, '#00ff00');
-    game.debug.lineInfo(inBeam, 32, 32);
-    if (outBeam) {
-        game.debug.lineInfo(outBeam, 32, 100);
-    }
-    game.debug.bodyInfo(spark, 32, 150);
-    game.debug.geom(outBeam, '#0000ff');
+    beams.forEach(function(item, index, array) {
+        game.debug.geom(item, '#ff0000');
+    });
+    bounds.forEach(function(item, index, array) {
+        game.debug.geom(item, '#00ff00');
+    });
+
+    // game.debug.spriteInfo(spark, 32, 170);  
 }
 
 </script>
