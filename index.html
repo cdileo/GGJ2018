@@ -72,26 +72,34 @@ class Player {
             this._onDown();
         } else if (this._key.justUp) {
             this._onUp();
+        } else if (this._key.isDown) {
+            this._isDown();
         }
         // console.log(`${this._keyName} is processing.`);
     }
 
     _onDown () {
-        this._power++;
-        this._angularVelocity++
+        this._state = PLAYER_STATES.spinning;
         console.log(`${this._keyName} is charging!`)
     }
 
+    _isDown() {
+        this._power++;
+        this._angularVelocity++
+    }
+
     _onUp () {
-        this.fireBeam(this._angularVelocity, this._power);
-        this._power = 0;
+        this._state = PLAYER_STATES.firing;
         this._angularVelocity = 0;
+        this.fireBeam();
+        this._power = 0;
         this._state = 2;
     }
 
     fireBeam () {
         // TODO: implement
-        console.log(`${this._keyName} is firing!`);
+        let fireAngle = this._sprite.body.data.angle;
+        console.log(`${this._keyName} is firing at ${fireAngle} degrees for ${this._power} distance!`);
     }
 
     charge() {
