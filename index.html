@@ -2,8 +2,11 @@
 <html lang="en"> 
 <head> 
     <meta charset="UTF-8" />
+
     <title>Space Golf</title>
-    <script src="phaser.min.js"></script>
+   <script src="phaser.min.js"></script>
+    <!--<script src="phaser-ce-2.10.0/build/phaser.js"></script>-->
+
     <style type="text/css">
         body {
             margin: 0;
@@ -28,17 +31,56 @@ var beams;
 var beamSprites;
 var lastIntersection;
 
-function preload() {
+var qKey;
+var players = [];
+var gameTime = 0;
 
-    game.load.image("star", "assets/pizza.png");
+//Sound map entries [sLabel, sFileName]
+const mSoundAssets = new Map([
+    ["mainLoop", "Angela ggj18 SV1 music loop.wav"],
+    ["shipDematerialize", "Dematerializing Spaceship (Angela).wav"],
+    ["laserBounce1", "LaserBounce01.wav"],
+    ["laserBounce2", "LaserBounce02.wav"],
+    ["laserBounce3", "LaserBounce03.wav"],
+    ["laserBounce4", "LaserBounce04.wav"],
+    ["laserBounce5", "LaserBounce05.wav"],
+    ["laserFire", "LaserFire.wav"],
+    ["laserLoop", "LaserLoop.wav"],
+    ["loseJingle", "Losing.. (Angela).wav"],
+    ["shipMaterialize", "Materializing Spaceship (Angela).wav"],
+    ["shipSpin", "Spinning Spaceship (Angela).wav"],
+    ["winJingle", "Winning! (Angela).wav"]
+]);
+let mSounds = new Map();
+
+function audioLoadHelper(mLabelsToFileNames) {
+    mLabelsToFileNames.forEach((val, key) => {
+        game.load.audio(key, `/assets/audio/${val}`);
+    });
+}
+
+function preload() {
+    // Sprites
+    game.load.image("pizza", "assets/pizza.png");
     game.load.image("spark", "assets/spark.png");
+
+    // Audio
+    audioLoadHelper(mSoundAssets);
 }
 
 function create() {
+    game.physics.startSystem(Phaser.Physics.P2JS);
+    players.push(new Player('A', 'pizza', game, 500, 500));
+    players.push(new Player('B', 'star', game, 100, 100));
+
+    // Load in all the sounds
+    mSoundAssets.forEach((_, key) => {
+        mSounds.set(key, game.add.audio(key));
+    });
 
     game.physics.startSystem(Phaser.Physics.P2JS);
 
-    playerShoot = game.add.sprite(game.world.width/2, game.world.height-100, "star");
+    playerShoot = game.add.sprite(game.world.width/2, game.world.height-100, "pizza");
     playerShoot.anchor.set(0.5);
     spark = game.add.sprite(game.world.width/2, game.world.height-100, "spark").alignTo(playerShoot, Phaser.TOP_CENTER);
     spark.anchor.set(0.5);
@@ -64,10 +106,7 @@ function create() {
 
     lastIntersection = -1;
     
-}
 
-function update() {
-    laserUpdate();
 }
 
 function lastBeam() {
@@ -130,6 +169,101 @@ function render() {
     });
 
     // game.debug.spriteInfo(spark, 32, 170);  
+
+}
+
+function update() {
+    gameTime = game.time.elapsed;
+    // Check player input
+    players.forEach((player) => {
+        player.processInput();
+    });
+    game.debug.text(players[0].getDebugInfo(), 10, 100);
+    game.debug.spriteInfo(players[0]._sprite);
+
+    laserUpdate();
+}
+
+const PLAYER_STATES = Object.freeze({
+    default: 0,
+    spinning: 1,
+    firing: 2,
+    moving: 3
+});
+
+const DEFAULT_ANGULAR_VELOCITY = 1;
+const ANGULAR_CHARGE_RATE = .5;
+const MAX_ANGULAR_VELOCITY = 100;
+
+const POWER_CHARGE_RATE = .1;
+
+class Player {
+    /**
+     * key is control assigned to this player
+     * optional: x, y coords
+    **/
+    constructor (cKey, sImageName, oGame, x, y) {
+        this._sprite = game.add.sprite(x, y, sImageName);
+        game.physics.p2.enable(this._sprite);
+
+        this._keyName = cKey;
+        this._key = game.input.keyboard.addKey(Phaser.Keyboard[cKey.toUpperCase()]);
+
+        this._state = PLAYER_STATES.default;
+        this._power = 0;
+        this._angularVelocity = DEFAULT_ANGULAR_VELOCITY;
+    }
+
+    processInput () {
+        if (this._key.justDown) {
+            this._onDown();
+        } else if (this._key.justUp) {
+            this._onUp();
+        } else if (this._key.isDown) {
+            this._isDown();
+        } else {
+            this._idle();
+        }
+    }
+
+    _idle() {
+        this._sprite.body.rotation += this._angularVelocity / gameTime;
+    }
+
+    _onDown () {
+        this._state = PLAYER_STATES.spinning;
+        console.log(`${this._keyName} is charging!`);
+        mSounds.get("shipSpin").play();
+    }
+
+    _isDown() {
+        this._power += POWER_CHARGE_RATE;
+        this._angularVelocity += ANGULAR_CHARGE_RATE / gameTime;
+        this._sprite.body.rotation += this._angularVelocity / gameTime;
+    }
+
+    _onUp () {
+        mSounds.get("shipSpin").stop();
+        this._state = PLAYER_STATES.firing;
+        this._angularVelocity = DEFAULT_ANGULAR_VELOCITY;
+        this.fireBeam();
+        this._power = 0;
+        this._state = 2;
+    }
+
+    fireBeam () {
+        // TODO: implement
+        let fireAngle = this._sprite.body.angle;
+        console.log(`${this._keyName} is firing at ${fireAngle} degrees for ${this._power} distance!`);
+    }
+
+    move(angle, power) {
+        //TODO: implement movement
+    }
+
+    getDebugInfo() {
+        return `Player ${this._keyName}:: Angular Velocity: ${this._angularVelocity} Power: ${this._power} State: ${this._state}`;
+    }
 }
 
 </script>
