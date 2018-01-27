@@ -30,7 +30,7 @@ function preload() {
 
 function create() {
     game.physics.startSystem(Phaser.Physics.P2JS);
-    players.push(new Player('A', 'pizza', game, 50, 50));
+    players.push(new Player('A', 'pizza', game, 500, 500));
     players.push(new Player('B', 'star', game, 100, 100));
     game.add.sprite(0, 0, "star");
 }
@@ -41,9 +41,8 @@ function update() {
     players.forEach((player) => {
         player.processInput();
     });
-    game.debug.text(players[0].getDebugInfo(), 10, 10);
+    game.debug.text(players[0].getDebugInfo(), 10, 100);
     game.debug.spriteInfo(players[0]._sprite);
-    players[0]._sprite.rotation += .5;
 }
 
 const PLAYER_STATES = Object.freeze({
@@ -53,10 +52,11 @@ const PLAYER_STATES = Object.freeze({
     moving: 3
 });
 
-const ANGULAR_ACCELERATION = 1;
+const DEFAULT_ANGULAR_VELOCITY = 1;
+const ANGULAR_CHARGE_RATE = .5;
 const MAX_ANGULAR_VELOCITY = 100;
+
 const POWER_CHARGE_RATE = .1;
-const ANGULAR_CHARGE_RATE = .1;
 
 class Player {
     /**
@@ -72,7 +72,7 @@ class Player {
 
         this._state = PLAYER_STATES.default;
         this._power = 0;
-        this._angularVelocity = 0;
+        this._angularVelocity = DEFAULT_ANGULAR_VELOCITY;
     }
 
     processInput () {
@@ -82,8 +82,14 @@ class Player {
             this._onUp();
         } else if (this._key.isDown) {
             this._isDown();
+        } else {
+            this._idle();
         }
         // console.log(`${this._keyName} is processing.`);
+    }
+
+    _idle() {
+        this._sprite.body.rotation += this._angularVelocity / gameTime;
     }
 
     _onDown () {
@@ -93,13 +99,13 @@ class Player {
 
     _isDown() {
         this._power += POWER_CHARGE_RATE;
-        this._angularVelocity += ANGULAR_CHARGE_RATE;
-        this._sprite.body.rotation = this._sprite.body.rotation + this._angularVelocity;
+        this._angularVelocity += ANGULAR_CHARGE_RATE / gameTime;
+        this._sprite.body.rotation += this._angularVelocity / gameTime;
     }
 
     _onUp () {
         this._state = PLAYER_STATES.firing;
-        this._angularVelocity = 0;
+        this._angularVelocity = DEFAULT_ANGULAR_VELOCITY;
         this.fireBeam();
         this._power = 0;
         this._state = 2;
