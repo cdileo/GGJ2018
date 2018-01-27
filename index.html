@@ -19,13 +19,15 @@ var game = new Phaser.Game(800, 600, Phaser.AUTO, '', { preload: preload, create
 
 var platforms;
 
+var qKey;
+var players = [];
+var gameTime = 0;
+
 function preload() {
     game.load.image("star", "assets/star.png");
     game.load.image("pizza", "assets/pizza.png")
 }
 
-var qKey;
-var players = [];
 function create() {
     game.physics.startSystem(Phaser.Physics.P2JS);
     players.push(new Player('A', 'pizza', game, 50, 50));
@@ -34,10 +36,14 @@ function create() {
 }
 
 function update() {
+    gameTime = game.time.elapsed;
     // Check player input
     players.forEach((player) => {
         player.processInput();
     });
+    game.debug.text(players[0].getDebugInfo(), 10, 10);
+    game.debug.spriteInfo(players[0]._sprite);
+    players[0]._sprite.rotation += .5;
 }
 
 const PLAYER_STATES = Object.freeze({
@@ -49,6 +55,8 @@ const PLAYER_STATES = Object.freeze({
 
 const ANGULAR_ACCELERATION = 1;
 const MAX_ANGULAR_VELOCITY = 100;
+const POWER_CHARGE_RATE = .1;
+const ANGULAR_CHARGE_RATE = .1;
 
 class Player {
     /**
@@ -84,8 +92,9 @@ class Player {
     }
 
     _isDown() {
-        this._power++;
-        this._angularVelocity++
+        this._power += POWER_CHARGE_RATE;
+        this._angularVelocity += ANGULAR_CHARGE_RATE;
+        this._sprite.body.rotation = this._sprite.body.rotation + this._angularVelocity;
     }
 
     _onUp () {
@@ -98,7 +107,7 @@ class Player {
 
     fireBeam () {
         // TODO: implement
-        let fireAngle = this._sprite.body.data.angle;
+        let fireAngle = this._sprite.body.angle;
         console.log(`${this._keyName} is firing at ${fireAngle} degrees for ${this._power} distance!`);
     }
 
@@ -111,6 +120,10 @@ class Player {
 
     move(angle, power) {
         //TODO: implement movement
+    }
+
+    getDebugInfo() {
+        return `Player ${this._keyName}:: Angular Velocity: ${this._angularVelocity} Power: ${this._power} State: ${this._state}`;
     }
 }
 
