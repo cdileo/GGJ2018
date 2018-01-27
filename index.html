@@ -28,18 +28,16 @@ var qKey;
 var players = [];
 function create() {
     game.physics.startSystem(Phaser.Physics.P2JS);
-    players.push(new Player(key, image, game));
+    players.push(new Player('A', 'pizza', game, 50, 50));
+    players.push(new Player('B', 'star', game, 100, 100));
     game.add.sprite(0, 0, "star");
-    
 }
 
 function update() {
     // Check player input
-    if (qKey.isDown) {
-        player1.body.rotateLeft(50);
-    } else {
-        player1.body.setZeroRotation();
-    }
+    players.forEach((player) => {
+        player.processInput();
+    });
 }
 
 const PLAYER_STATES = Object.freeze({
@@ -48,23 +46,52 @@ const PLAYER_STATES = Object.freeze({
     firing: 2,
     moving: 3
 });
-// TODO
+
+const ANGULAR_ACCELERATION = 1;
+const MAX_ANGULAR_VELOCITY = 100;
+
 class Player {
     /**
      * key is control assigned to this player
      * optional: x, y coords
     **/
-    constructor (key, image, game) {
-        this._sprite = game.add.sprite(50, 50, "pizza");
+    constructor (cKey, sImageName, oGame, x, y) {
+        this._sprite = game.add.sprite(x, y, sImageName);
         game.physics.p2.enable(this._sprite);
-        this._key = game.input.keyboard.addKey(Phaser.Keyboard[key.toUpperCase()]);
-        this._state = PLAYER_STATES.default;
 
-        _addCallbacks(this);
+        this._keyName = cKey;
+        this._key = game.input.keyboard.addKey(Phaser.Keyboard[cKey.toUpperCase()]);
+
+        this._state = PLAYER_STATES.default;
+        this._power = 0;
+        this._angularVelocity = 0;
     }
 
-    _addCallbacks() {
+    processInput () {
+        if (this._key.justDown) {
+            this._onDown();
+        } else if (this._key.justUp) {
+            this._onUp();
+        }
+        // console.log(`${this._keyName} is processing.`);
+    }
 
+    _onDown () {
+        this._power++;
+        this._angularVelocity++
+        console.log(`${this._keyName} is charging!`)
+    }
+
+    _onUp () {
+        this.fireBeam(this._angularVelocity, this._power);
+        this._power = 0;
+        this._angularVelocity = 0;
+        this._state = 2;
+    }
+
+    fireBeam () {
+        // TODO: implement
+        console.log(`${this._keyName} is firing!`);
     }
 
     charge() {
