@@ -112,7 +112,7 @@ function create() {
         var bottom = game.add.sprite(i, game.world.height-60, 'shippart');
         bottom.angle = Phaser.Math.between(68, 100);
         bottom.scale.set(.8);
-        // bottom.body.kinematic = true;
+        // bottom.body.kinematic qq  = true;
     }
 
 
@@ -122,6 +122,12 @@ function create() {
     goal.scale.set(2);
     game.physics.p2.enable(goal);
     goal.body.kinematic = true;
+
+    // Tween example
+    
+    // sprite.anchor.set(-5, 1);
+    // var tween = game.add.tween(sprite.scale);
+    // tween.to({ y: 4 }, 5000, 'Linear', true, 0);    
 
 
     
