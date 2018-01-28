@@ -4,7 +4,8 @@
     <meta charset="UTF-8" />
 
     <title>Space Golf</title>
-   <script src="phaser.min.js"></script>
+    <script src="phaser.min.js"></script>
+    <script src="/MenuState.js"></script>
     <!--<script src="phaser-ce-2.10.0/build/phaser.js"></script>-->
 
     <style type="text/css">
@@ -19,7 +20,6 @@
 
 var game = new Phaser.Game(1280, 720, Phaser.AUTO, '');
 
-const MenuState = {};
 const PlayState = {};
 const WinState = {};
 
@@ -407,8 +407,10 @@ function laserSoundHelper() {
     return mSounds.get(`laserBounce${rnd}`)
 }
 
+game.state.add("menu", MenuState);
 game.state.add("play", PlayState);
-game.state.start("play");
+// game.state.start("play");
+game.state.start("menu");
 
 </script>
 
