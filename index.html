@@ -36,6 +36,8 @@ var qKey;
 var players = [];
 var gameTime = 0;
 
+var junk;
+
 //Sound map entries [sLabel, sFileName]
 const mSoundAssets = new Map([
     ["mainLoop", "Angela ggj18 SV1 music loop.wav"],
@@ -92,24 +94,23 @@ function create() {
         new Phaser.Line(game.world.width-10, 40, game.world.width-10, game.world.height-10)
     ];
     
+
+    // Boundary
+    junk = game.add.group();
+    junk.enableBody = false;;
     var i;
     for (i = 50; i < game.world.width; i += Phaser.Math.between(50, 125)) {
-        var top = game.add.sprite(i, 0, 'shippart');
+        var top = junk.create(i, 0, 'shippart');
         top.angle = Phaser.Math.between(68, 100); 
         top.scale.set(.8);
-        debugger;
-        var bottom = game.add.sprite(i, game.world.height-80, 'shippart');
+        top.body.static = true;
+        var bottom = junk.create(i, game.world.height-80, 'shippart');
         bottom.angle = Phaser.Math.between(68, 100);
         bottom.scale.set(.8);
+        bottom.body.static = true;
     }
-}
 
-function lastBeam() {
-    return beams[beams.length-1];
-}
-
-function lastBeamSprite() {
-    return beamSprites[beamSprites.length - 1];
+    
 }
 
 function render() {
