@@ -190,12 +190,19 @@ class Beam {
         this.beamHead.fixedRotation = true;
         this.beamHead.body.fixedRotation = true;
         this.beamHead.body.angle = angle;
+        this.beamHead.body.onBeginContact.add(this.checkForWin, this.beamHead);
 
         this.lines = [new Phaser.Line(originSprite.x, originSprite.y, this.beamHead.x, this.beamHead.y)];
     }
 
     lastLine() {
         return this.lines[this.lines.length-1];
+    }
+
+    checkForWin (body, bodyB, shapeA, shapeB, equation) {
+        if (body && body.sprite && body.sprite.key === "goal") {
+            console.log("A WINNER IS YOU!");
+        }
     }
 
     update() {
