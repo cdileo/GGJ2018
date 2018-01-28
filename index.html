@@ -111,6 +111,8 @@ PlayState.create = function () {
         new Phaser.Line(10, game.world.height-10, game.world.width, game.world.height-10),
         new Phaser.Line(40, 10, 10, game.world.height-10),
         new Phaser.Line(game.world.width-10, 40, game.world.width-10, game.world.height-10)
+
+        new Phaser.Line()
     ];
     
 
@@ -245,7 +247,6 @@ class Beam {
         return function(body, bodyB, shapeA, shapeB, equation) {
 
             if (body && body.sprite && body.sprite.key === "shippart") {
-                debugger;
                 var junkRadians = body.rotation;
                 var x = body.x;
                 var y = body.y;
@@ -304,7 +305,6 @@ class Beam {
 
     update() {
 
-        debugger;
         var sprite = this.beamSprites[this.beamSprites.length-1]
         sprite.scale.set(1, this.lastLine().length/60);
         sprite.angle = this.beamHead.body.angle;
