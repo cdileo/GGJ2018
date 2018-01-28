@@ -6,6 +6,8 @@
     <title>Space Golf</title>
     <script src="phaser.min.js"></script>
     <script src="/MenuState.js"></script>
+    <script src="/InstructionState.js"></script>
+    <script src="/WinState.js"></script>
     <!--<script src="phaser-ce-2.10.0/build/phaser.js"></script>-->
 
     <style type="text/css">
@@ -21,7 +23,6 @@
 var game = new Phaser.Game(1280, 720, Phaser.AUTO, '');
 
 const PlayState = {};
-const WinState = {};
 
 var playerShoot;
 var spark;
@@ -233,7 +234,9 @@ class Beam {
             var tween = game.add.tween(winFlourish.scale);
             tween.to({ y: 20, x: 5}, 2500, 'Linear', true, 0);
             text = game.add.text(100, 600, 'YOU WIN! Your space station was destroyed, but you escaped in time', { fontSize: '32px', fill: '#fff' });
-            
+            setTimeout(() => {
+                game.state.start("win");
+            }, 2000);
         } else {
             // Play a random laser sound
             laserSoundHelper().play();
@@ -431,8 +434,10 @@ function laserSoundHelper() {
 }
 
 game.state.add("menu", MenuState);
+game.state.add("instructions", InstructionState);
 game.state.add("play", PlayState);
-// game.state.start("play");
+game.state.add("win", WinState);
+
 game.state.start("menu");
 
 </script>
