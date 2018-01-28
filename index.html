@@ -4,7 +4,10 @@
     <meta charset="UTF-8" />
 
     <title>Space Golf</title>
-   <script src="phaser.min.js"></script>
+    <script src="phaser.min.js"></script>
+    <script src="/MenuState.js"></script>
+    <script src="/InstructionState.js"></script>
+    <script src="/WinState.js"></script>
     <!--<script src="phaser-ce-2.10.0/build/phaser.js"></script>-->
     <link rel="icon" type="image/png" href="favicon.ico"/>
     <link rel="shortcut icon" href="favicon.ico" type="image/x-icon"/>
@@ -18,7 +21,9 @@
 
 <script type="text/javascript">
 
-var game = new Phaser.Game(1280, 720, Phaser.AUTO, '', { preload: preload, create: create, update: update, render: render });
+var game = new Phaser.Game(1280, 720, Phaser.AUTO, '');
+
+const PlayState = {};
 
 var playerShoot;
 var spark;
@@ -66,27 +71,35 @@ function audioLoadHelper(mLabelsToFileNames) {
     });
 }
 
-function preload() {
+PlayState.preload = function () {
     // Sprites
     game.load.image("background", "assets/images/background.png");
     game.load.spritesheet('blue', 'assets/spritesheet/bluefull.png', 33, 48);
     game.load.spritesheet('purple', 'assets/spritesheet/purplefull.png', 33, 48);
-    // game.load.image("purple", "assets/images/purple.png");
-    // game.load.image("blue", "assets/images/blue.png");
+    game.load.image("planet", "assets/images/planet.png");
     game.load.image("shippart", "assets/images/part1.png");
-    game.load.image("spark", "assets/spark.png");
     game.load.image("goal", "assets/images/goal.png");
+<<<<<<< HEAD
     game.load.image("beam", "assets/images/laserSingle.png");
+=======
+    game.load.image("beam", "assets/images/laserblue.png");
+    game.load.image("spark", "assets/spark.png");
+>>>>>>> cb29c54c65c229dae16f544da7474b0a47bf6367
 
     // Audio
     audioLoadHelper(mSoundAssets);
 }
 
-function create() {
+PlayState.create = function () {
+    var planet;
+
     game.physics.startSystem(Phaser.Physics.P2JS);
     game.add.sprite(0, 0, 'background');
     players.push(new Player('A', 'purple', game, 500, 500));
     players.push(new Player('B', 'blue', game, 100, 100));
+    planet = game.add.sprite(game.world.width/2, game.world.height/2, 'planet');
+    game.physics.p2.enable(planet);
+    planet.body.static = true;
 
     // Load in all the sounds
     mSoundAssets.forEach((_, key) => {
@@ -149,7 +162,7 @@ function create() {
     laserFire.onStop.add(() => laserLoop.play());
 }
 
-function render() {
+PlayState.render = function () {
 
 
     players.forEach(function(item, index, array) {
@@ -164,7 +177,7 @@ function render() {
 
 }
 
-function update() {
+PlayState.update = function () {
     gameTime = game.time.elapsed;
     // Check player input
     players.forEach((player) => {
@@ -277,6 +290,9 @@ class Beam {
             tween.to({ y: 20, x: 10}, 3000, 'Linear', true, 0);
             text = game.add.text(100, 600, 'YOU WIN! Your space station was destroyed, but you escaped in time', { fontSize: '32px', fill: '#fff' });
 
+            setTimeout(() => {
+                game.state.start("win");
+            }, 2000);
         } else {
             // Play a random laser sound
             laserSoundHelper().play();
@@ -493,6 +509,13 @@ function laserSoundHelper() {
     let rnd = game.rnd.integerInRange(1, 5);
     return mSounds.get(`laserBounce${rnd}`)
 }
+
+game.state.add("menu", MenuState);
+game.state.add("instructions", InstructionState);
+game.state.add("play", PlayState);
+game.state.add("win", WinState);
+
+game.state.start("menu");
 
 </script>
 
