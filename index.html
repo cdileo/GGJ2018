@@ -82,19 +82,7 @@ function create() {
 
     game.physics.startSystem(Phaser.Physics.P2JS);
 
-    playerShoot = game.add.sprite(game.world.width/2, game.world.height-100, "pizza");
-    playerShoot.anchor.set(0.5);
-    spark = game.add.sprite(game.world.width/2, game.world.height-100, "spark").alignTo(playerShoot, Phaser.TOP_CENTER);
-    spark.anchor.set(0.5);
     
-
-    game.physics.p2.enable(spark);
-    spark.fixedRotation = true;
-    spark.body.fixedRotation = true;
-    playerShoot.scale.x = 2;
-    playerShoot.scale.y = 2;
-
-    spark.body.angle = 45;
 
     bounds =[
         new Phaser.Line(10, 10, game.world.width-10, 40),
@@ -102,14 +90,6 @@ function create() {
         new Phaser.Line(40, 10, 10, game.world.height-10),
         new Phaser.Line(game.world.width-10, 40, game.world.width-10, game.world.height-10)
     ];
-
-
-    var startSpark = game.add.sprite(playerShoot.x, playerShoot.y, "spark");  
-    startSpark.anchor.set(.5);  
-    beamSprites = [startSpark];
-    beams = [new Phaser.Line(startSpark.x, startSpark.y, spark.x, spark.y)];
-
-    lastIntersection = -1;
     
 
 }
@@ -122,58 +102,13 @@ function lastBeamSprite() {
     return beamSprites[beamSprites.length - 1];
 }
 
-function laserUpdate() {
-    if (charge > 0) {
-        spark.body.moveForward(speed);
-        if (beamSprites.length > 0) {
-            lastBeam().fromSprite(lastBeamSprite(), spark, true);
-        }       
-        // charge--;
-
-    } else {
-        spark.body.setZeroVelocity();
-    }
-
-    bounds.forEach(function(item, index, array) {
-        bouncePoint = lastBeam().intersects(item);
-        if (bouncePoint && lastIntersection != index) {
-            onIntersect(lastBeam(), item);
-            lastIntersection = index;
-        }
-        
-    });
-    bouncePoint = null;
-}
-
-function teleport(player, beams, beamSprites) {
-
-
-
-
-}
-
-function onIntersect(beam, bound) {
-        
-        var bounceSpark = game.add.sprite(bouncePoint.x, bouncePoint.y, "spark");  
-        bounceSpark.anchor.set(.5);  
-        beamSprites.push(bounceSpark);
-        
-        var angleOfReflection = beam.reflect(bound);
-
-        var outBeam = new Phaser.Line().fromAngle(bouncePoint.x, bouncePoint.y, angleOfReflection, 20);
-
-        spark.body.x = outBeam.end.x;
-        spark.body.y = outBeam.end.y;
-        spark.body.rotation = angleOfReflection+Math.PI/2;
-
-        beams.push(outBeam);
-}
-
 function render() {
 
-    beams.forEach(function(item, index, array) {
-        game.debug.geom(item, '#ff0000');
+
+    players.forEach(function(item, index, array) {
+        item.render();
     });
+
     bounds.forEach(function(item, index, array) {
         game.debug.geom(item, '#00ff00');
     });
@@ -191,7 +126,7 @@ function update() {
     game.debug.text(players[0].getDebugInfo(), 10, 100);
     game.debug.spriteInfo(players[0]._sprite);
 
-    laserUpdate();
+
 }
 
 const PLAYER_STATES = Object.freeze({
@@ -207,6 +142,89 @@ const MAX_ANGULAR_VELOCITY = 100;
 
 const POWER_CHARGE_RATE = .1;
 
+class Beam {
+    constructor (playerSprite, angle, power) {
+
+        this.intersectionPoints = null;
+        this.lastIntersection = null;
+        this.beamHead = null;
+        this.lines = null;
+        this.charge = power;
+
+        let originSprite = game.add.sprite(playerSprite.x, playerSprite.y, "spark");
+        originSprite.anchor.set(.5);
+        this.intersectionPoints = [originSprite]; // Things we've bounced off of
+        
+        this.lastIntersection = -1;
+
+        this.beamHead = game.add.sprite(game.world.width/2, game.world.height-100, "spark").alignTo(playerSprite, Phaser.TOP_CENTER);
+        this.beamHead.anchor.set(0.5);
+        game.physics.p2.enable(this.beamHead);
+        this.beamHead.fixedRotation = true;
+        this.beamHead.body.fixedRotation = true;
+        this.beamHead.body.angle = angle;
+
+        this.lines = [new Phaser.Line(originSprite.x, originSprite.y, this.beamHead.x, this.beamHead.y)];
+    }
+
+    lastLine() {
+        return this.lines[this.lines.length-1];
+    }
+
+    update() {
+
+        if (this.charge > 0) {
+            this.beamHead.body.moveForward(speed);
+            this.lastLine().fromSprite(
+                this.intersectionPoints[this.intersectionPoints.length-1],
+                this.beamHead,
+                true
+            );
+            this.charge--;
+        } else {
+            this.beamHead.body.setZeroVelocity();
+        }
+
+
+
+        bounds.forEach((item, index, array) => {
+            var bouncePoint = this.lastLine().intersects(item);
+            if (bouncePoint && this.lastIntersection != index) {
+                this.onIntersect(this.lastLine(), item, bouncePoint);
+                this.lastIntersection = index;
+            }
+        
+        });
+
+    }
+
+    onIntersect(line, bound, bouncePoint) {
+        var bounceSpark = game.add.sprite(bouncePoint.x, bouncePoint.y, "spark");  
+        bounceSpark.anchor.set(.5);  
+        this.intersectionPoints.push(bounceSpark);
+        
+        var angleOfReflection = line.reflect(bound);
+
+        var outBeam = new Phaser.Line().fromAngle(
+            bouncePoint.x, 
+            bouncePoint.y, 
+            angleOfReflection, 
+            20);
+
+        this.beamHead.body.x = outBeam.end.x;
+        this.beamHead.body.y = outBeam.end.y;
+        this.beamHead.body.rotation = angleOfReflection+Math.PI/2;
+
+        this.lines.push(outBeam);
+    }
+
+    render() {
+        this.lines.forEach(function(item, index, array) {
+            game.debug.geom(item, '#ff0000');
+        });
+    }
+}
+
 class Player {
     /**
      * key is control assigned to this player
@@ -215,6 +233,9 @@ class Player {
     constructor (cKey, sImageName, oGame, x, y) {
         this._sprite = game.add.sprite(x, y, sImageName);
         game.physics.p2.enable(this._sprite);
+        this._sprite.anchor.set(0.5);
+        this._beam = null;
+
 
         this._keyName = cKey;
         this._key = game.input.keyboard.addKey(Phaser.Keyboard[cKey.toUpperCase()]);
@@ -233,6 +254,15 @@ class Player {
             this._isDown();
         } else {
             this._idle();
+        }
+        if (this._beam) {
+            this._beam.update();
+        }
+    }
+
+    render() {
+        if (this._beam) {
+            this._beam.render();
         }
     }
 
@@ -265,6 +295,8 @@ class Player {
         // TODO: implement
         let fireAngle = this._sprite.body.angle;
         console.log(`${this._keyName} is firing at ${fireAngle} degrees for ${this._power} distance!`);
+
+        this._beam = new Beam(this, this._sprite.body.angle, this._power);
     }
 
     move(angle, power) {
