@@ -27,6 +27,7 @@ var maxCharge = 300;
 var charge = maxCharge;
 
 var bounds;
+
 var beams;
 var beamSprites;
 var lastIntersection;
@@ -102,8 +103,11 @@ function create() {
         new Phaser.Line(game.world.width-10, 40, game.world.width-10, game.world.height-10)
     ];
 
-    beams = [new Phaser.Line(playerShoot.x, playerShoot.y, spark.x, spark.y)];
-    beamSprites = [];
+
+    var startSpark = game.add.sprite(playerShoot.x, playerShoot.y, "spark");  
+    startSpark.anchor.set(.5);  
+    beamSprites = [startSpark];
+    beams = [new Phaser.Line(startSpark.x, startSpark.y, spark.x, spark.y)];
 
     lastIntersection = -1;
     
@@ -123,10 +127,8 @@ function laserUpdate() {
         spark.body.moveForward(speed);
         if (beamSprites.length > 0) {
             lastBeam().fromSprite(lastBeamSprite(), spark, true);
-        } else {
-            lastBeam().fromSprite(playerShoot, spark, true);  
         }       
-        charge--;
+        // charge--;
 
     } else {
         spark.body.setZeroVelocity();
@@ -141,6 +143,13 @@ function laserUpdate() {
         
     });
     bouncePoint = null;
+}
+
+function teleport(player, beams, beamSprites) {
+
+
+
+
 }
 
 function onIntersect(beam, bound) {
