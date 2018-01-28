@@ -196,7 +196,14 @@ class Beam {
         
         this.lastIntersection = -1;
 
-        this.beamHead = game.add.sprite(game.world.width/2, game.world.height-100, "spark").alignTo(playerSprite, Phaser.TOP_CENTER);
+        this.beamHead = game.add.sprite(
+            game.world.width/2, 
+            game.world.height-100, 
+            "spark"
+        ).alignTo(
+            playerSprite, 
+            Phaser.CENTRE
+        );
         this.beamHead.anchor.set(0.5);
         game.physics.p2.enable(this.beamHead);
         this.beamHead.fixedRotation = true;
@@ -216,15 +223,17 @@ class Beam {
             console.log("A WINNER IS YOU!");
             mSounds.get("mainLoop").stop();
             mSounds.get("winJingle").play();
-        } else {
-            // Play a random laser sound
-            laserSoundHelper().play();
+            
             var winFlourish = game.add.sprite(body.x, body.y, "beam");
             winFlourish.angle = 90;
             winFlourish.anchor.set(.5, 0);
+            
             var tween = game.add.tween(winFlourish.scale);
             tween.to({ y: 20, x: 5}, 2500, 'Linear', true, 0);
             text = game.add.text(100, 600, 'YOU WIN! Your space station was destroyed, but you escaped in time', { fontSize: '32px', fill: '#fff' });
+        } else {
+            // Play a random laser sound
+            laserSoundHelper().play();
         }
     }
 
@@ -357,7 +366,7 @@ class Player {
     _onUp () {
         mSounds.get("shipSpin").stop();
         this._state = PLAYER_STATES.firing;
-        this._angularVelocity = DEFAULT_ANGULAR_VELOCITY;
+        this._angularVelocity = 0;
         this.fireBeam();
         this._power = 0;
         this._state = 2;
@@ -382,6 +391,7 @@ class Player {
             that._beam = null;
             mSounds.get("laserLoop").stop();
             mSounds.get("shipMaterialize").play();
+            that._angularVelocity = DEFAULT_ANGULAR_VELOCITY;
         };
     }
 
