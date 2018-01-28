@@ -98,7 +98,6 @@ function create() {
     
 
     // Boundary
-
     junks = game.add.group();
     // junks.enableBody = true;
     var i;
@@ -107,24 +106,29 @@ function create() {
         var top = game.add.sprite(i, -15, 'shippart');
         top.angle = Phaser.Math.between(68, 100); 
         top.scale.set(.8);
-        // top.body.kinematic = true;
-        // var bottom = junks.create(i, game.world.height-80, 'shippart');
         var bottom = game.add.sprite(i, game.world.height-60, 'shippart');
         bottom.angle = Phaser.Math.between(68, 100);
         bottom.scale.set(.8);
-        // bottom.body.kinematic = true;
     }
 
 
     // GOAL
     goal = game.add.sprite(
-        game.world.width-50, game.world.height/2, 'goal');
+        game.world.width-50,
+        game.world.height/2,
+        'goal'
+    );
     goal.scale.set(2);
     game.physics.p2.enable(goal);
     goal.body.kinematic = true;
 
-
-    
+    // Music
+    //TODO: enable on completion
+    // mSounds.get("mainLoop").play();
+    let laserFire = mSounds.get("laserFire");
+    let laserLoop = mSounds.get("laserLoop");
+    laserLoop.loop = true;
+    laserFire.onStop.add(() => laserLoop.play());
 }
 
 function render() {
@@ -148,8 +152,8 @@ function update() {
     players.forEach((player) => {
         player.processInput();
     });
-    game.debug.text(players[0].getDebugInfo(), 10, 100);
-    game.debug.spriteInfo(players[0]._sprite);
+    // game.debug.text(players[0].getDebugInfo(), 10, 100);
+    // game.debug.spriteInfo(players[0]._sprite);
 
 
 }
@@ -202,6 +206,11 @@ class Beam {
     checkForWin (body, bodyB, shapeA, shapeB, equation) {
         if (body && body.sprite && body.sprite.key === "goal") {
             console.log("A WINNER IS YOU!");
+            mSounds.get("mainLoop").stop();
+            mSounds.get("winJingle").play();
+        } else {
+            // Play a random laser sound
+            laserSoundHelper().play();
         }
     }
 
@@ -339,8 +348,8 @@ class Player {
 
     fireBeam () {
         let fireAngle = this._sprite.body.angle;
-        console.log(`${this._keyName} is firing at ${fireAngle} degrees for ${this._power} distance!`);
-
+        // console.log(`${this._keyName} is firing at ${fireAngle} degrees for ${this._power} distance!`);
+        mSounds.get("laserFire").play();
         this._beam = new Beam(this._sprite, this._sprite.body.angle, this._power, this.teleportTo());
     }
 
@@ -353,12 +362,19 @@ class Player {
 
             that._beam.destroy();
             that._beam = null;
+            mSounds.get("laserLoop").stop();
+            mSounds.get("shipMaterialize").play();
         };
     }
 
     getDebugInfo() {
         return `Player ${this._keyName}:: Angular Velocity: ${this._angularVelocity} Power: ${this._power} State: ${this._state}`;
     }
+}
+
+function laserSoundHelper() {
+    let rnd = game.rnd.integerInRange(1, 5);
+    return mSounds.get(`laserBounce${rnd}`)
 }
 
 </script>
