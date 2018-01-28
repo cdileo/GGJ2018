@@ -7,3 +7,13 @@ Roxanne Taylor
 Angela Chen
 
 Chris Dileo
+
+# PixelRoute
+Emily Lampson
+Sara Mortimer
+
+# Tree of Audio
+Scott F. Thompson
+Devin Bird
+Peki Hajdukovic
+Murray Cameron Smith
