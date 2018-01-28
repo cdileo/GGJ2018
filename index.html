@@ -36,7 +36,8 @@ var qKey;
 var players = [];
 var gameTime = 0;
 
-var junk;
+var junks;
+var goal;
 
 //Sound map entries [sLabel, sFileName]
 const mSoundAssets = new Map([
@@ -68,6 +69,7 @@ function preload() {
     game.load.image("shippart", "assets/images/part1.png");
     game.load.image("blue", "assets/images/blue.png");
     game.load.image("spark", "assets/spark.png");
+    game.load.image("goal", "assets/images/goal.png");
 
     // Audio
     audioLoadHelper(mSoundAssets);
@@ -97,21 +99,30 @@ function create() {
 
     // Boundary
 
-    junk = game.add.group();
-    // junk.enableBody = true;
+    junks = game.add.group();
+    // junks.enableBody = true;
     var i;
     for (i = 50; i < game.world.width; i += Phaser.Math.between(50, 125)) {
-        // var top = junk.create(i, 0, 'shippart');
+        // var top = junks.create(i, 0, 'shippart');
         var top = game.add.sprite(i, -15, 'shippart');
         top.angle = Phaser.Math.between(68, 100); 
         top.scale.set(.8);
-        // top.body.static = true;
-        // var bottom = junk.create(i, game.world.height-80, 'shippart');
+        // top.body.kinematic = true;
+        // var bottom = junks.create(i, game.world.height-80, 'shippart');
         var bottom = game.add.sprite(i, game.world.height-60, 'shippart');
         bottom.angle = Phaser.Math.between(68, 100);
         bottom.scale.set(.8);
-        // bottom.body.static = true;
+        // bottom.body.kinematic = true;
     }
+
+
+    // GOAL
+    goal = game.add.sprite(
+        game.world.width-50, game.world.height/2, 'goal');
+    goal.scale.set(2);
+    game.physics.p2.enable(goal);
+    goal.body.kinematic = true;
+
 
     
 }
