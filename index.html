@@ -63,6 +63,7 @@ function audioLoadHelper(mLabelsToFileNames) {
 function preload() {
     // Sprites
     game.load.image("pizza", "assets/images/pizza.png");
+    game.load.image("shippart", "assets/images/shippart.png");
     game.load.image("star", "assets/images/star.png");
     game.load.image("spark", "assets/spark.png");
 
@@ -91,7 +92,16 @@ function create() {
         new Phaser.Line(game.world.width-10, 40, game.world.width-10, game.world.height-10)
     ];
     
-
+    var i;
+    for (i = 50; i < game.world.width; i += Phaser.Math.between(50, 125)) {
+        var top = game.add.sprite(i, 0, 'shippart');
+        top.angle = Phaser.Math.between(68, 100); 
+        top.scale.set(.8);
+        debugger;
+        var bottom = game.add.sprite(i, game.world.height-80, 'shippart');
+        bottom.angle = Phaser.Math.between(68, 100);
+        bottom.scale.set(.8);
+    }
 }
 
 function lastBeam() {
