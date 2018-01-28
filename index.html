@@ -94,8 +94,10 @@ PlayState.create = function () {
     players.push(new Player('A', 'purple', game, 500, 500));
     players.push(new Player('B', 'blue', game, 100, 100));
     planet = game.add.sprite(game.world.width/2, game.world.height/2, 'planet');
+    planet.scale.set(.5);
     game.physics.p2.enable(planet);
     planet.body.static = true;
+    var fakePlanet = game.add.sprite(game.world.width/2-100, game.world.height/2-100, 'planet');
 
     // Load in all the sounds
     mSoundAssets.forEach((_, key) => {
@@ -106,11 +108,29 @@ PlayState.create = function () {
     game.physics.p2.restitution = 1.0;
     
 
+
+        var offset = 20;
+        var top = fakePlanet.top+offset;
+        var bottom = fakePlanet.bottom-offset;
+        var right = fakePlanet.right-offset;
+        var left = fakePlanet.left+offset;
+
     bounds =[
         new Phaser.Line(10, 10, game.world.width-10, 40),
         new Phaser.Line(10, game.world.height-10, game.world.width, game.world.height-10),
         new Phaser.Line(40, 10, 10, game.world.height-10),
+<<<<<<< HEAD
+        new Phaser.Line(game.world.width-10, 40, game.world.width-10, game.world.height-10),
+
+        // Planet
+
+        new Phaser.Line(left, top, left, bottom),
+        new Phaser.Line(left, top, right, top),
+        new Phaser.Line(right, bottom, left, bottom),
+        new Phaser.Line(right, bottom, right, top)
+=======
         new Phaser.Line(game.world.width-10, 40, game.world.width-10, game.world.height-10)
+>>>>>>> 75f1b3d672c8a0819ec737db1d01ebf41d891517
     ];
     
 
