@@ -64,9 +64,9 @@ function audioLoadHelper(mLabelsToFileNames) {
 
 function preload() {
     // Sprites
-    game.load.image("pizza", "assets/images/pizza.png");
-    game.load.image("shippart", "assets/images/shippart.png");
-    game.load.image("star", "assets/images/star.png");
+    game.load.image("purple", "assets/images/purple.png");
+    game.load.image("shippart", "assets/images/part1.png");
+    game.load.image("blue", "assets/images/blue.png");
     game.load.image("spark", "assets/spark.png");
 
     // Audio
@@ -75,8 +75,8 @@ function preload() {
 
 function create() {
     game.physics.startSystem(Phaser.Physics.P2JS);
-    players.push(new Player('A', 'pizza', game, 500, 500));
-    players.push(new Player('B', 'star', game, 100, 100));
+    players.push(new Player('A', 'purple', game, 500, 500));
+    players.push(new Player('B', 'blue', game, 100, 100));
 
     // Load in all the sounds
     mSoundAssets.forEach((_, key) => {
@@ -96,18 +96,21 @@ function create() {
     
 
     // Boundary
+
     junk = game.add.group();
-    junk.enableBody = false;;
+    // junk.enableBody = true;
     var i;
     for (i = 50; i < game.world.width; i += Phaser.Math.between(50, 125)) {
-        var top = junk.create(i, 0, 'shippart');
+        // var top = junk.create(i, 0, 'shippart');
+        var top = game.add.sprite(i, -15, 'shippart');
         top.angle = Phaser.Math.between(68, 100); 
         top.scale.set(.8);
-        top.body.static = true;
-        var bottom = junk.create(i, game.world.height-80, 'shippart');
+        // top.body.static = true;
+        // var bottom = junk.create(i, game.world.height-80, 'shippart');
+        var bottom = game.add.sprite(i, game.world.height-60, 'shippart');
         bottom.angle = Phaser.Math.between(68, 100);
         bottom.scale.set(.8);
-        bottom.body.static = true;
+        // bottom.body.static = true;
     }
 
     
@@ -257,7 +260,7 @@ class Player {
     constructor (cKey, sImageName, oGame, x, y) {
         this._sprite = game.add.sprite(x, y, sImageName);
         game.physics.p2.enable(this._sprite);
-        this._sprite.anchor.set(0.5);
+        this._sprite.anchor.set(.5, 0.7);
         this._beam = null;
 
 
