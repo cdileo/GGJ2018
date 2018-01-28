@@ -75,22 +75,25 @@ PlayState.preload = function () {
     game.load.image("background", "assets/images/background.png");
     game.load.spritesheet('blue', 'assets/spritesheet/bluefull.png', 33, 48);
     game.load.spritesheet('purple', 'assets/spritesheet/purplefull.png', 33, 48);
-    // game.load.image("purple", "assets/images/purple.png");
-    // game.load.image("blue", "assets/images/blue.png");
+    game.load.image("planet", "assets/images/planet.png");
     game.load.image("shippart", "assets/images/part1.png");
-    game.load.image("spark", "assets/spark.png");
     game.load.image("goal", "assets/images/goal.png");
-    game.load.image("beam", "assets/images/laser.png");
+    game.load.image("beam", "assets/images/laserblue.png");
 
     // Audio
     audioLoadHelper(mSoundAssets);
 }
 
 PlayState.create = function () {
+    var planet;
+
     game.physics.startSystem(Phaser.Physics.P2JS);
     game.add.sprite(0, 0, 'background');
     players.push(new Player('A', 'purple', game, 500, 500));
     players.push(new Player('B', 'blue', game, 100, 100));
+    planet = game.add.sprite(game.world.width/2, game.world.height/2, 'planet');
+    game.physics.p2.enable(planet);
+    planet.body.static = true;
 
     // Load in all the sounds
     mSoundAssets.forEach((_, key) => {
@@ -122,7 +125,6 @@ PlayState.create = function () {
         bottom.angle = Phaser.Math.between(68, 100);
         bottom.scale.set(.8);
     }
-
 
     // GOAL
     goal = game.add.sprite(
