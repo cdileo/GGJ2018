@@ -143,13 +143,14 @@ const MAX_ANGULAR_VELOCITY = 100;
 const POWER_CHARGE_RATE = .1;
 
 class Beam {
-    constructor (playerSprite, angle, power) {
+    constructor (playerSprite, angle, power, teleportCallback) {
 
         this.intersectionPoints = null;
         this.lastIntersection = null;
         this.beamHead = null;
         this.lines = null;
         this.charge = power;
+        this.teleportCallback = teleportCallback;
 
         let originSprite = game.add.sprite(playerSprite.x, playerSprite.y, "spark");
         originSprite.anchor.set(.5);
@@ -183,6 +184,8 @@ class Beam {
             this.charge--;
         } else {
             this.beamHead.body.setZeroVelocity();
+            this.teleportCallback(this.beamHead.x, this.beamHead.y, this.beamHead.body.angle);
+            return;
         }
 
         bounds.forEach((item, index, array) => {
@@ -220,6 +223,17 @@ class Beam {
         this.lines.forEach(function(item, index, array) {
             game.debug.geom(item, '#ff0000');
         });
+    }
+
+    destroy () {
+        this.intersectionPoints.forEach((pt) => {
+            pt.destroy();
+        });
+        this.intersectionPoints = null;
+        this.lastIntersection = -1;
+        this.beamHead.destroy();
+        this.beamHead = null;
+        this.lines = null;
     }
 }
 
@@ -294,11 +308,19 @@ class Player {
         let fireAngle = this._sprite.body.angle;
         console.log(`${this._keyName} is firing at ${fireAngle} degrees for ${this._power} distance!`);
 
-        this._beam = new Beam(this._sprite, this._sprite.body.angle, this._power);
+        this._beam = new Beam(this._sprite, this._sprite.body.angle, this._power, this.teleportTo());
     }
 
-    move(angle, power) {
-        //TODO: implement movement
+    teleportTo () {
+        let that = this;
+        return function (x, y, angle) {
+            that._sprite.body.x = x;
+            that._sprite.body.y = y;
+            that._sprite.body.angle = angle;
+
+            that._beam.destroy();
+            that._beam = null;
+        };
     }
 
     getDebugInfo() {
