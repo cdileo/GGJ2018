@@ -5,9 +5,9 @@
 
     <title>Space Golf</title>
     <script src="phaser.min.js"></script>
-    <script src="/MenuState.js"></script>
+    <!-- <script src="/MenuState.js"></script>
     <script src="/InstructionState.js"></script>
-    <script src="/WinState.js"></script>
+    <script src="/WinState.js"></script> -->
     <!--<script src="phaser-ce-2.10.0/build/phaser.js"></script>-->
     <link rel="icon" type="image/png" href="favicon.ico"/>
     <link rel="shortcut icon" href="favicon.ico" type="image/x-icon"/>
@@ -119,6 +119,7 @@ PlayState.create = function () {
         new Phaser.Line(10, 10, game.world.width-10, 40),
         new Phaser.Line(10, game.world.height-10, game.world.width, game.world.height-10),
         new Phaser.Line(40, 10, 10, game.world.height-10),
+<<<<<<< HEAD
         new Phaser.Line(game.world.width-10, 40, game.world.width-10, game.world.height-10),
 
         // Planet
@@ -127,6 +128,9 @@ PlayState.create = function () {
         new Phaser.Line(left, top, right, top),
         new Phaser.Line(right, bottom, left, bottom),
         new Phaser.Line(right, bottom, right, top)
+=======
+        new Phaser.Line(game.world.width-10, 40, game.world.width-10, game.world.height-10)
+>>>>>>> 75f1b3d672c8a0819ec737db1d01ebf41d891517
     ];
     
 
@@ -520,12 +524,117 @@ function laserSoundHelper() {
     return mSounds.get(`laserBounce${rnd}`)
 }
 
+// STATES
+const MenuState = {
+    spaceKey: null,
+
+    preload : function () {
+        game.load.image("splashScreen", "assets/submission/coverart.png");
+        game.load.audio('mainLoop', 'assets/audio/Angela ggj18 SV1 music loop.wav');
+    },
+
+    music: null,
+
+    create : function () {
+        game.add.sprite(0, 0, "splashScreen");
+        this.music = game.add.audio('mainLoop');
+        this.music.play();
+        this._createMenuText();
+        this.spaceKey = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+    },
+
+    update : function () {
+        if (this.spaceKey.isDown) {
+            game.state.start("instructions");
+        }
+    },
+
+    _createMenuText : () => {
+        game.add.text(
+            600, 
+            600, 
+            `¡Press Spacebar to Play!`,
+            { fontSize: '32px', fill: '#FFD1BA' }
+        );
+    }
+};
+
+const InstructionState = {
+    spaceKey: null,
+
+    preload : function () {
+        game.load.image("background", "assets/images/background.png");
+    },
+
+    create : function () {
+        game.add.sprite(0, 0, "background");
+        this._createInstructionsText();
+        this.spaceKey = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+    },
+
+    update : function () {
+        if (this.spaceKey.isDown) {
+            game.state.start("play");
+        }
+    },
+
+    _createInstructionsText : () => {
+        game.add.text(
+            100, 
+            100, 
+            `Controls:
+            A - Purple
+            B - Blue
+            
+            Teleport your robot to the satellite to win!
+            Hold down your control button for a longer shot but beware: 
+            the longer you charge, the faster you'll spin.`,
+            { fontSize: '32px', fill: '#FFD1BA' }
+        );
+    }
+};
+
+const WinState = {
+    spaceKey: null,
+
+    preload : function () {
+        game.load.image("background", "assets/images/background.png");
+    },
+
+    create : function () {
+        game.add.sprite(0, 0, "background");
+        this._createFlavourText();
+        this.spaceKey = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+    },
+
+    update : function () {
+        if (this.spaceKey.isDown) {
+            game.state.start("menu");
+        }
+    },
+
+    _createFlavourText : () => {
+        game.add.text(
+            100, 
+            100, 
+            `Congratulations! You've managed to escape the dark reaches of space!
+You return to your home planet and fufill your destiny of becoming 
+room-bot-001.
+            
+            Press Spacebar to restart.`,
+            { fontSize: '32px', fill: '#FFD1BA' }
+        );
+    }
+};
+
 game.state.add("menu", MenuState);
 game.state.add("instructions", InstructionState);
 game.state.add("play", PlayState);
 game.state.add("win", WinState);
 
-game.state.start("menu");
+window.onload = () => {
+    game.state.start("menu");
+}
 
 </script>
 
