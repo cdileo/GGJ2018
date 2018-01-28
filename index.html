@@ -185,8 +185,6 @@ class Beam {
             this.beamHead.body.setZeroVelocity();
         }
 
-
-
         bounds.forEach((item, index, array) => {
             var bouncePoint = this.lastLine().intersects(item);
             if (bouncePoint && this.lastIntersection != index) {
@@ -296,7 +294,7 @@ class Player {
         let fireAngle = this._sprite.body.angle;
         console.log(`${this._keyName} is firing at ${fireAngle} degrees for ${this._power} distance!`);
 
-        this._beam = new Beam(this, this._sprite.body.angle, this._power);
+        this._beam = new Beam(this._sprite, this._sprite.body.angle, this._power);
     }
 
     move(angle, power) {
