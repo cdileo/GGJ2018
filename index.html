@@ -17,7 +17,11 @@
 
 <script type="text/javascript">
 
-var game = new Phaser.Game(1280, 720, Phaser.AUTO, '', { preload: preload, create: create, update: update, render: render });
+var game = new Phaser.Game(1280, 720, Phaser.AUTO, '');
+
+const MenuState = {};
+const PlayState = {};
+const WinState = {};
 
 var playerShoot;
 var spark;
@@ -65,7 +69,7 @@ function audioLoadHelper(mLabelsToFileNames) {
     });
 }
 
-function preload() {
+PlayState.preload = function () {
     // Sprites
     game.load.image("background", "assets/images/background.png");
     game.load.spritesheet('blue', 'assets/spritesheet/bluefull.png', 33, 48);
@@ -81,7 +85,7 @@ function preload() {
     audioLoadHelper(mSoundAssets);
 }
 
-function create() {
+PlayState.create = function () {
     game.physics.startSystem(Phaser.Physics.P2JS);
     game.add.sprite(0, 0, 'background');
     players.push(new Player('A', 'purple', game, 500, 500));
@@ -139,7 +143,7 @@ function create() {
     laserFire.onStop.add(() => laserLoop.play());
 }
 
-function render() {
+PlayState.render = function () {
 
 
     players.forEach(function(item, index, array) {
@@ -154,7 +158,7 @@ function render() {
 
 }
 
-function update() {
+PlayState.update = function () {
     gameTime = game.time.elapsed;
     // Check player input
     players.forEach((player) => {
@@ -162,8 +166,6 @@ function update() {
     });
     // game.debug.text(players[0].getDebugInfo(), 10, 100);
     // game.debug.spriteInfo(players[0]._sprite);
-
-
 }
 
 const PLAYER_STATES = Object.freeze({
@@ -404,6 +406,9 @@ function laserSoundHelper() {
     let rnd = game.rnd.integerInRange(1, 5);
     return mSounds.get(`laserBounce${rnd}`)
 }
+
+game.state.add("play", PlayState);
+game.state.start("play");
 
 </script>
 
