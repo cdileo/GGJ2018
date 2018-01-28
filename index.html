@@ -282,12 +282,13 @@ class Beam {
             winFlourish.anchor.set(.5, 0);
             
             var tween = game.add.tween(winFlourish.scale);
+            tween.onComplete.add(() => {
+                setTimeout(() => {
+                    game.state.start("win");
+                }, 2000);
+            });
             tween.to({ y: 20, x: 10}, 3000, 'Linear', true, 0);
             text = game.add.text(100, 600, 'YOU WIN! Your space station was destroyed, but you escaped in time', { fontSize: '32px', fill: '#fff' });
-
-            setTimeout(() => {
-                game.state.start("win");
-            }, 2000);
         } else {
             // Play a random laser sound
             laserSoundHelper().play();
@@ -533,7 +534,7 @@ const MenuState = {
         game.add.text(
             600, 
             600, 
-            `¡Press Spacebar to Play!`,
+            `¡Press SPACEBAR to Play!`,
             { fontSize: '32px', fill: '#FFD1BA' }
         );
     }
@@ -568,7 +569,9 @@ const InstructionState = {
             
             Teleport your robot to the satellite to win!
             Hold down your control button for a longer shot but beware: 
-            the longer you charge, the faster you'll spin.`,
+            the longer you charge, the faster you'll spin.
+            
+            Press SPACEBAR to continue...`,
             { fontSize: '32px', fill: '#FFD1BA' }
         );
     }
@@ -601,7 +604,7 @@ const WinState = {
 You return to your home planet and fufill your destiny of becoming 
 room-bot-001.
             
-            Press Spacebar to restart.`,
+            Press SPACEBAR to restart...`,
             { fontSize: '32px', fill: '#FFD1BA' }
         );
     }
