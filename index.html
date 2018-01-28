@@ -61,7 +61,8 @@ function audioLoadHelper(mLabelsToFileNames) {
 
 function preload() {
     // Sprites
-    game.load.image("pizza", "assets/pizza.png");
+    game.load.image("pizza", "assets/images/pizza.png");
+    game.load.image("star", "assets/images/star.png");
     game.load.image("spark", "assets/spark.png");
 
     // Audio
@@ -125,7 +126,7 @@ function laserUpdate() {
         } else {
             lastBeam().fromSprite(playerShoot, spark, true);  
         }       
-        // charge--;
+        charge--;
 
     } else {
         spark.body.setZeroVelocity();
