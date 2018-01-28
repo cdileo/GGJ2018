@@ -136,11 +136,12 @@ const PLAYER_STATES = Object.freeze({
     moving: 3
 });
 
+// PLAYER CONSTANTS
 const DEFAULT_ANGULAR_VELOCITY = 1;
 const ANGULAR_CHARGE_RATE = .5;
-const MAX_ANGULAR_VELOCITY = 100;
+const MAX_ANGULAR_VELOCITY = 50;
 
-const POWER_CHARGE_RATE = .1;
+const POWER_CHARGE_RATE = 1;
 
 class Beam {
     constructor (playerSprite, angle, power, teleportCallback) {
@@ -291,6 +292,7 @@ class Player {
     _isDown() {
         this._power += POWER_CHARGE_RATE;
         this._angularVelocity += ANGULAR_CHARGE_RATE / gameTime;
+        this._angularVelocity = Math.min(this._angularVelocity, MAX_ANGULAR_VELOCITY);
         this._sprite.body.rotation += this._angularVelocity / gameTime;
     }
 
@@ -304,7 +306,6 @@ class Player {
     }
 
     fireBeam () {
-        // TODO: implement
         let fireAngle = this._sprite.body.angle;
         console.log(`${this._keyName} is firing at ${fireAngle} degrees for ${this._power} distance!`);
 
