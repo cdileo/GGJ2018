@@ -65,9 +65,12 @@ function audioLoadHelper(mLabelsToFileNames) {
 
 function preload() {
     // Sprites
-    game.load.image("purple", "assets/images/purple.png");
+    game.load.image("background", "assets/images/background.png");
+    game.load.spritesheet('blue', 'assets/spritesheet/bluefull.png', 33, 48);
+    game.load.spritesheet('purple', 'assets/spritesheet/purplefull.png', 33, 48);
+    // game.load.image("purple", "assets/images/purple.png");
+    // game.load.image("blue", "assets/images/blue.png");
     game.load.image("shippart", "assets/images/part1.png");
-    game.load.image("blue", "assets/images/blue.png");
     game.load.image("spark", "assets/spark.png");
     game.load.image("goal", "assets/images/goal.png");
 
@@ -77,6 +80,7 @@ function preload() {
 
 function create() {
     game.physics.startSystem(Phaser.Physics.P2JS);
+    game.add.sprite(0, 0, 'background');
     players.push(new Player('A', 'purple', game, 500, 500));
     players.push(new Player('B', 'blue', game, 100, 100));
 
@@ -270,6 +274,9 @@ class Player {
     **/
     constructor (cKey, sImageName, oGame, x, y) {
         this._sprite = game.add.sprite(x, y, sImageName);
+        this._sprite.animations.add('materialize', [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], 10, false);
+        this._sprite.animations.add('dematerialize', [11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22], 10, false);
+        this._sprite.frame = 11;
         game.physics.p2.enable(this._sprite);
         this._sprite.anchor.set(.5, 0.7);
         this._beam = null;
@@ -343,6 +350,7 @@ class Player {
             that._sprite.body.x = x;
             that._sprite.body.y = y;
             that._sprite.body.angle = angle;
+            that._sprite.animations.play('dematerialize');
 
             that._beam.destroy();
             that._beam = null;
